@@ -1,5 +1,7 @@
 import { Octokit } from "octokit";
 import { db } from "../server/db";
+import axios from "axios";
+import { aiSummarizeCommit } from "./gemini";
 
 export const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -35,7 +37,7 @@ export const getCommitHashes = async (
       new Date(a.commit.author.date).getTime(),
   ) as any[];
 
-  return sortedCommits.slice(0, 15).map((commit: any) => ({
+  return sortedCommits.slice(0, 10).map((commit: any) => ({
     commitHash: commit.sha as string,
     commitMessage: commit.commit.message ?? "",
     commitAuthorName: commit.commit?.author?.name ?? "",
@@ -46,7 +48,7 @@ export const getCommitHashes = async (
 
 // console.log(getCommitHashes(githubUrl));
 
-export const pullCommits = async (projectId: string) => {
+export const pollCommits = async (projectId: string) => {
   const { project, githubUrl } = await fetchProjectGithubUrl(projectId);
   const commitHashes = await getCommitHashes(githubUrl);
 
@@ -54,11 +56,48 @@ export const pullCommits = async (projectId: string) => {
     projectId,
     commitHashes,
   );
+  const summaryResponses = await Promise.allSettled(
+    unprocessedCommits.map((commit) => {
+      return summarizeCommit(githubUrl, commit.commitHash);
+    }),
+  );
 
-  return unprocessedCommits;
+  const summaries = summaryResponses.map((response) => {
+    if (response.status === "fulfilled") {
+      return response.value as string;
+    }
+
+    return "";
+  });
+
+  const commits = await db.commit.createMany({
+    data: summaries.map((summary, index) => {
+      console.log(`processing commit ${index}`);
+      return {
+        projectId: projectId,
+        commitHash: unprocessedCommits[index]!.commitHash,
+        commitMessage: unprocessedCommits[index]!.commitMessage,
+        commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
+        commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
+        commitDate: unprocessedCommits[index]!.commitDate,
+        summary,
+      };
+    }),
+  });
+
+  return commits;
 };
 
-async function summarizeCommit(githubUrl: string, commitHash: string) {}
+async function summarizeCommit(githubUrl: string, commitHash: string) {
+  // get the diff and then pass diff to ai
+  const { data } = await axios.get(`${githubUrl}/commit/${commitHash}.diff`, {
+    headers: {
+      Accept: "application/vnd.github.v3.diff",
+    },
+  });
+
+  return (await aiSummarizeCommit(data)) || "";
+}
 
 async function fetchProjectGithubUrl(projectId: string) {
   const project = await db.project.findUnique({
@@ -94,5 +133,3 @@ async function filterUnprocessedCommits(
 
   return unprocessedCommits;
 }
-
-await pullCommits("cm58alwdo0000tbtwr5cujfwi");
