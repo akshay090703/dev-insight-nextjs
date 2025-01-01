@@ -19,7 +19,7 @@ const DashboardPage
                             <Github className='size-5 text-white' />
                             <div className="ml-2">
                                 <p className="text-sm font-medium text-white">
-                                    This project is linked to <Link href={project?.githubUrl ?? ""} className='inline-flex items-center text-white/80 hover:underline'>{project?.githubUrl} <ExternalLink className='ml-1 size-4' /></Link>
+                                    This project is linked to <Link href={project?.githubUrl ?? ""} className='inline-flex items-center text-white/80 hover:underline' target='_blank'>{project?.githubUrl} <ExternalLink className='ml-1 size-4' /></Link>
                                 </p>
                             </div>
                         </div>

@@ -5,11 +5,12 @@ import { db } from "@/server/db";
 
 export const loadGithubRepo = async (
   githubUrl: string,
+  branch: "main" | "master",
   githubToken?: string,
 ) => {
   const loader = new GithubRepoLoader(githubUrl, {
     accessToken: githubToken || "",
-    branch: "main",
+    branch: branch,
     ignoreFiles: [
       "package-lock.json",
       "yarn.lock",
@@ -28,14 +29,15 @@ export const loadGithubRepo = async (
 export const indexGithubRepo = async (
   projectId: string,
   githubUrl: string,
+  branch: "main" | "master",
   githubToken?: string,
 ) => {
-  const docs = await loadGithubRepo(githubUrl, githubToken);
+  const docs = await loadGithubRepo(githubUrl, branch, githubToken);
   const allEmbeddings = await generateEmbeddings(docs);
 
   await Promise.allSettled(
     allEmbeddings.map(async (embedding, index) => {
-      console.log(`processing ${index} of ${allEmbeddings.length}`);
+      // console.log(`processing ${index} of ${allEmbeddings.length}`);
       if (!embedding) return;
 
       const sourceCodeEmbedding = await db.sourceCodeEmbedding.create({
@@ -71,3 +73,11 @@ const generateEmbeddings = async (docs: Document[]) => {
     }),
   );
 };
+
+// context: Object {  }
+// ​
+// elapsedMs: 7484
+// ​
+// input: Object { githubUrl: "https://github.com/akshay090703/learn-quest-nextjs", name: "learn quest nextjs", githubToken: "" }
+// ​
+// result: TRPCClientError: Unable to fetch repository files: 404 {"message":"No commit found for the ref main","documentation_url":"https://docs.github.com/v3/repos/contents/","status":"404"}

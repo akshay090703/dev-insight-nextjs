@@ -7,7 +7,7 @@ export const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
-const githubUrl = "https://github.com/akshay090703/smart-link-react-java";
+const githubUrl = "https://github.com/akshay090703/learn-quest-nextjs";
 
 type Response = {
   commitHash: string;
@@ -25,6 +25,8 @@ export const getCommitHashes = async (
   if (!owner || !repo) {
     throw new Error("Invalid github url");
   }
+
+  console.log(owner + " " + repo);
 
   const { data } = await octokit.rest.repos.listCommits({
     owner,
@@ -49,6 +51,8 @@ export const getCommitHashes = async (
 // console.log(getCommitHashes(githubUrl));
 
 export const pollCommits = async (projectId: string) => {
+  console.log(projectId);
+
   const { project, githubUrl } = await fetchProjectGithubUrl(projectId);
   const commitHashes = await getCommitHashes(githubUrl);
 
