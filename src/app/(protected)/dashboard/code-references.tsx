@@ -19,18 +19,20 @@ const CodeReferences = ({ fileReferences }: Props) => {
 
 
     return (
-        <div className='max-w-full'>
+        <div className='max-w-[66vw]'>
             <Tabs value={tab} onValueChange={setTab}>
                 <div className="overflow-scroll flex flex-col gap-2 bg-gray-200 p-1 rounded-md">
-                    {
-                        fileReferences.map(file => (
-                            <button onClick={() => setTab(file.fileName)} key={file.fileName} className={cn('px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap text-muted-foreground hover:bg-muted hover:text-white', {
-                                'bg-primary text-primary-foreground': tab === file.fileName
-                            })}>
-                                {file.fileName}
-                            </button>
-                        ))
-                    }
+                    <div className="flex flex-wrap gap-1">
+                        {
+                            fileReferences.map(file => (
+                                <button onClick={() => setTab(file.fileName)} key={file.fileName} className={cn('px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap text-muted-foreground hover:bg-muted hover:text-white', {
+                                    'bg-primary text-primary-foreground': tab === file.fileName
+                                })}>
+                                    {file.fileName}
+                                </button>
+                            ))
+                        }
+                    </div>
                     {
                         fileReferences.map(file => (
                             <TabsContent key={file.fileName} value={file.fileName} className='max-h-[40vh] overflow-scroll max-w-7xl rounded-md'>

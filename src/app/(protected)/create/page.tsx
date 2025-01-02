@@ -16,10 +16,13 @@ type FormInput = {
 };
 
 const CreatePage = () => {
-    const { register, handleSubmit, reset, setValue, watch } = useForm<FormInput>();
+    const { register, handleSubmit, reset, setValue } = useForm<FormInput>({
+        defaultValues: {
+            branch: "main",
+        },
+    });
     const createProject = api.project.createProject.useMutation();
     const refetch = useRefetch();
-    const selectedBranch = watch("branch");
 
     function onSubmit(data: FormInput) {
         createProject.mutate(
@@ -80,7 +83,7 @@ const CreatePage = () => {
                         </Select>
                         <div className="h-4"></div>
 
-                        <Button type="submit" disabled={createProject.isPending || !selectedBranch}>
+                        <Button type="submit" disabled={createProject.isPending}>
                             Create Project
                         </Button>
                     </form>
