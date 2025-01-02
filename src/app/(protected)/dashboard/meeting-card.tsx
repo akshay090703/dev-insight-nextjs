@@ -10,9 +10,20 @@ import { api } from '@/trpc/react';
 import useProject from '@/hooks/use-project';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
 
 const MeetingCard = () => {
     const { project } = useProject()
+    const processMeeting = useMutation({
+        mutationFn: async (data: { meetingUrl: string, meetingId: string, projectId: string }) => {
+            const { meetingUrl, meetingId, projectId } = data
+            const response = await axios.post('/api/process-meeting', { meetingUrl, meetingId, projectId })
+
+            return response.data;
+        }
+    })
+
     const router = useRouter()
     const [isUploading, setIsUploading] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -38,9 +49,10 @@ const MeetingCard = () => {
                 meetingUrl: downloadUrl,
                 name: acceptedFile!.name
             }, {
-                onSuccess: () => {
+                onSuccess: (meeting) => {
                     toast.success("Meeting uploaded successfully");
                     router.push('/meetings')
+                    processMeeting.mutateAsync({ meetingUrl: downloadUrl, meetingId: meeting.id, projectId: project.id })
                 },
                 onError: () => {
                     toast.error("Failed to upload meeting!");
@@ -58,7 +70,7 @@ const MeetingCard = () => {
                 !isUploading &&
                 <>
                     <Presentation className='h-10 w-10 animate-bounce' />
-                    <h3 className="mt-2 text-sm font-semibold text-gray-900">
+                    <h3 className="mt-2 text-sm font-semibold text-gray-700">
                         Create a new meeting
                     </h3>
                     <p className="mt-1 text-center text-sm text-gray-500">
