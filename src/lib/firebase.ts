@@ -11,7 +11,7 @@ import {
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCkTWLDOe51NuYec8Xgw6XKDnVqHC16SyA",
+  apiKey: process.env.FIREBASE_API_KEY,
   authDomain: "dev-insight-nextjs-570c7.firebaseapp.com",
   projectId: "dev-insight-nextjs-570c7",
   storageBucket: "dev-insight-nextjs-570c7.firebasestorage.app",
