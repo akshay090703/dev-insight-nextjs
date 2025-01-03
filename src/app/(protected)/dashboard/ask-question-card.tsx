@@ -36,13 +36,12 @@ const AskQuestionCard = () => {
         setOpen(true)
         setFileReferences(filesReferences)
 
+        setLoading(false);
         for await (const delta of readStreamableValue(output)) {
             if (delta) {
                 setAnswer(ans => ans + delta);
             }
         }
-
-        setLoading(false)
     }
 
     const refetch = useRefetch();

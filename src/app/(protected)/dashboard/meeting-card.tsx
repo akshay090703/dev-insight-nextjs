@@ -59,7 +59,7 @@ const MeetingCard = () => {
                 }
             })
 
-            window.alert(downloadUrl)
+            // window.alert(downloadUrl)
             setIsUploading(false)
         }
     });
